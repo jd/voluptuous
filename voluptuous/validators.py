@@ -252,8 +252,10 @@ class Any(_WithSubValidators):
                     error = e
         else:
             if error:
-                raise error if self.msg is None else AnyInvalid(self.msg)
-            raise AnyInvalid(self.msg or 'no valid value found')
+                raise error if self.msg is None else AnyInvalid(
+                    self.msg, path=path)
+            raise AnyInvalid(self.msg or 'no valid value found',
+                             path=path)
 
 
 # Convenience alias

@@ -1085,6 +1085,34 @@ def test_self_validation():
     schema({"follow": {"follow": {"number": 123456}}})
 
 
+def test_any_error_has_path():
+    """https://github.com/alecthomas/voluptuous/issues/347"""
+    s = Schema({
+        Optional('q'): int,
+        Required('q2'): Any(int, msg='toto')
+    })
+    try:
+        s({'q': 'str', 'q2': 'tata'})
+    except MultipleInvalid as exc:
+        assert exc.errors == [
+            {'path': ['q'],
+             'error_type': 'dictionary value',
+             'error_message': 'expected int'},
+            {'path': ['q2'],
+             'error_type': 'dictionary value',
+             'error_message': 'toto'},
+        ] or [
+            {'path': ['q2'],
+             'error_type': 'dictionary value',
+             'error_message': 'toto'},
+            {'path': ['q'],
+             'error_type': 'dictionary value',
+             'error_message': 'expected int'},
+        ]
+    else:
+        assert False, "Did not raise AnyInvalid"
+
+
 def test_self_any():
     schema = Schema({"number": int,
                      "follow": Any(Self, "stop")})
